@@ -351,13 +351,13 @@ def check_for_led_and_buzzer():
         else:
             pi.write(pin1, 0)
             pi.write(pin2, 0)
-    while True:
+    while True: #infinite loop to check if buzzer/led should activate
         helper(E1_buzzer, E1_buzzer_time, E1_IN_Buzz, E1_OUT_Buzz)
         helper(E1_led, E1_led_time, E1_IN_Led, E2_OUT_Led)
         helper(E2_buzzer, E2_buzzer_time, E2_IN_Buzz, E2_OUT_Buzz)
         helper(E2_led, E2_led_time, E2_IN_Led, E2_OUT_Led)
-        time.sleep(1)
+        time.sleep(1) #wait 1 sed before looping again
 
 
 t1 = threading.Thread(target=check_for_led_and_buzzer)
-t1.start()
+t1.start() #threaded seperately as infinite loop
