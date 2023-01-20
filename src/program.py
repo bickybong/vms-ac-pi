@@ -20,8 +20,6 @@ E2_IN = None
 E2_OUT = None
 
 # sets events callbacks to E1/2 vars
-
-
 def mag_and_button():
     cb1 = GPIOconfig.pi.callback(
         events.E1_Mag, pigpio.RISING_EDGE, events.mag_detects_rising)

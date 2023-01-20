@@ -36,6 +36,7 @@ class TimerError(Exception):
 
 
 class Timer:
+# This is a Python class called Timer that allows the user to start, stop, check, and check the status of a timer.
     def __init__(self):
         self._start_time = None
 
@@ -103,6 +104,7 @@ BUZZER_TIMEOUT_E2 = None
 
 
 def update_config():
+# Reads config.json file and sets global vars
     '''Call this before events.update_credOccur'''
     global config, GPIOpins, E1, E2, E1_Mag, E1_Button, E2_Mag, E2_Button, TIMEOUT, \
         CRED_TIMEOUT_E1, CRED_TIMEOUT_E2, MAG_TIMEOUT_E1, MAG_TIMEOUT_E2, BUZZER_TIMEOUT_E1, BUZZER_TIMEOUT_E2
@@ -143,7 +145,7 @@ E2_thirdPartyOption = "N.A."
 
 
 def verify_datetime(schedule):
-
+# Function to check if the schedule is currently active or not
     try:
         for scheduledate, scheduletime in schedule.items():
             # print(scheduledate,scheduletime)
@@ -171,7 +173,7 @@ def verify_datetime(schedule):
 
 
 def check_entrance_status():
-
+#checks if current time is within schedule and unlocks doors
     if verify_datetime(E1_entrance_schedule):
         # print("unlock E1")
         relay.lock_unlock_entrance_one(E1_thirdPartyOption, True)
@@ -188,6 +190,7 @@ def check_entrance_status():
 
 
 def update_credOccur():
+    #reads credoccur.json and updates vars
     '''Call this after events.update_config'''
     global credOccur, E1_entrance_schedule, E2_entrance_schedule, E1_thirdPartyOption, E2_thirdPartyOption
     f = open(path+'/json/credOccur.json')
@@ -235,8 +238,8 @@ pinsvalue_E2_IN = []  # array to store pins
 pinsvalue_E2_OUT = []  # array to store pins
 
 
-# takes in string wiegand value, return name, passwords, accessgroup and schedule
 def check_for_wiegand(value):
+# takes in string wiegand value, return name, passwords, accessgroup and schedule
     for entranceslist in credOccur:
         Accessgroups = entranceslist["EntranceDetails"]["AccessGroups"]
         for specificAccessGroup in Accessgroups:
@@ -261,8 +264,8 @@ def check_for_wiegand(value):
 
 
 def open_door(entrance_prefix):
+    #opens door based on entrance prefix
     '''Helper function for eventActionTriggers.py
-
     Args:
     entrance_prefix(string): "E1" | "E2"
     '''
@@ -299,6 +302,13 @@ def open_GEN_OUT(GEN_OUT_PIN, timer):
 
 
 def reader_detects_bits(bits, value, entrance):
+#     reads data from card/keypad and checks if it is valid than assigns vars to store credentials
+#     The function then goes on to perform several steps:
+#
+# start or restart a timer
+# gather credentials
+# check credentials
+# follow up actions (open door, logs, etc)
 
     global mag_E1_allowed_to_open
     global mag_E2_allowed_to_open
@@ -536,6 +546,7 @@ def reader_detects_bits(bits, value, entrance):
 
 
 def check_for_masterpassword(credentials, entrancename, entrance_direction):
+    #checks credentials to masterpassword
     for entranceslist in credOccur:
         if entranceslist["Entrance"] == entrancename:
             for devicenumber, devicedetails in entranceslist["EntranceDetails"]["AuthenticationDevices"].items():
@@ -548,7 +559,7 @@ def check_for_masterpassword(credentials, entrancename, entrance_direction):
 
 
 def verify_authtype(entrance, device):
-    # for data in list of entrances
+    # checks for the valid type of auth method
     for entranceslist in credOccur:
         if entranceslist["Entrance"] == entrance:
             for devicenumber, devicedetails in entranceslist["EntranceDetails"]["AuthenticationDevices"].items():
@@ -604,6 +615,7 @@ def verify_datetime(schedule):
 
 
 def verify_zone_status(entrance, entrancestatus, persondetails):
+    #checks if person is inside zone when entering/exiting
     filename = "json/" + "status.json"
     with open(filename, "r") as checkfile:
         try:
@@ -638,7 +650,7 @@ def verify_zone_status(entrance, entrancestatus, persondetails):
 
 
 def update_zone_status(entrance, entrancestatus, persondetails):
-
+    #updates zone data in checkdata
     filename = "json/"+"status.json"
     with open(filename, "r") as checkfile:
         try:
@@ -672,7 +684,7 @@ def update_zone_status(entrance, entrancestatus, persondetails):
 
 # check if antipassback if required
 def verify_antipassback(entrancename):
-    # read from credOccur.json
+    # check if antipassback is enabled from credOccur.json
     for entrancelist in credOccur:
         if entrancelist["Entrance"] == entrancename:
             if entrancelist["EntranceDetails"]["Antipassback"] == "Yes":
@@ -682,6 +694,7 @@ def verify_antipassback(entrancename):
 
 
 def mag_detects_rising(gpio, level, tick):
+    #called when magnetic sensor opens, it starts timer for E1/2 and logs event into system
     global mag_E1_allowed_to_open
     global mag_E2_allowed_to_open
 
@@ -705,6 +718,7 @@ def mag_detects_rising(gpio, level, tick):
 
 
 def mag_detects_falling(gpio, level, tick):
+    #called when magnetic sensor closes, it stops timer for E1/2 and logs event into system
     global mag_E1_allowed_to_open
     global mag_E2_allowed_to_open
 
@@ -724,6 +738,7 @@ def mag_detects_falling(gpio, level, tick):
 
 
 def button_detects_change(gpio, level, tick):
+    #triggered when button pressed, it prints msg, opens door and recordsthe event
     global mag_E1_allowed_to_open
     global mag_E2_allowed_to_open
 
